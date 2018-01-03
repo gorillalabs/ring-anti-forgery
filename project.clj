@@ -6,7 +6,6 @@
   :middleware [leiningen.v/dependency-version-from-scm
                leiningen.v/version-from-scm
                leiningen.v/add-workspace-data]
-
   :plugins [[com.roomkey/lein-v "6.2.0"]]
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [crypto-random "1.2.0"]
