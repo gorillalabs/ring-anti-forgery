@@ -1,4 +1,4 @@
-(defproject gorillalabs/ring-anti-forgery "0.0.0"
+(defproject argus.osquery/ring-anti-forgery "0.0.0"
   :description "Ring middleware to prevent CSRF attacks"
   :url "https://github.com/ring-clojure/ring-anti-forgery"
   :license {:name "The MIT License"
@@ -7,7 +7,6 @@
   :middleware [leiningen.v/dependency-version-from-scm
                leiningen.v/version-from-scm
                leiningen.v/add-workspace-data]
-
   :plugins [[lein-monolith "1.0.1"]
             [com.roomkey/lein-v "6.2.0"]]
   :dependencies [[org.clojure/clojure "1.8.0"]
