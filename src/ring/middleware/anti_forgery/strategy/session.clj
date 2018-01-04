@@ -9,7 +9,7 @@
 
 
 (defn- session-token [request]
-  (get-in request [:session ::ring.middleware.anti-forgery/anti-forgery-token]))
+  (get-in request [:session :ring.middleware.anti-forgery/anti-forgery-token]))
 
 
 (defn- add-session-token [session-sms response request token]
@@ -19,7 +19,7 @@
         response
         (-> response
             (assoc :session (:session response (:session request)))
-            (assoc-in [:session ::ring.middleware.anti-forgery/anti-forgery-token] token))))))
+            (assoc-in [:session :ring.middleware.anti-forgery/anti-forgery-token] token))))))
 
 (deftype SessionSMS []
   strategy/StateManagementStrategy
