@@ -56,9 +56,12 @@
   (or (:error-handler options)
       (constant-handler (:error-response options default-error-response))))
 
-
-
-
+(defn new-token
+  "Creates a new CSRF token to use.
+  Attention, does not work for session based token handling,
+  as it will not be put into session."
+  [state-management-strategy request]
+  (strategy/create-token state-management-strategy request))
 
 (defn wrap-anti-forgery
   "Middleware that prevents CSRF attacks. Any POST request to the handler

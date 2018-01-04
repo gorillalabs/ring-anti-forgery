@@ -4,7 +4,8 @@
             [ring.middleware.anti-forgery.strategy.signed-token :as signed-token]
             [buddy.core.keys :as keys]
             [clj-time.core :as time]
-            [ring.middleware.anti-forgery.strategy :as strategy])
+            [ring.middleware.anti-forgery.strategy :as strategy]
+            [ring.middleware.anti-forgery.strategy.session :as session])
   (:use clojure.test
         ring.middleware.anti-forgery
         ring.mock.request))
@@ -272,6 +273,14 @@
       (is (= (get-in response [:session ::af/anti-forgery-token])
              (:body response))))))
 
+
+(deftest new-token-via-signed-token-test
+  (letfn [(handler [request]
+            {:status  200
+             :headers {}
+             :body    (new-token signed-token-sms request)})]
+    (let [response ((wrap-anti-forgery handler signed-token-options) (request :get "/"))]
+      (is (valid-signed-token? pubkey (:body response))))))
 
 
 (deftest token-binding-via-signed-token-test
