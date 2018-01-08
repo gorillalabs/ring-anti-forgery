@@ -298,6 +298,7 @@
              :headers {}
              :body    @*anti-forgery-token*})]
     (let [response ((wrap-anti-forgery handler encrypted-token-options) (request :get "/"))]
+      (is (< (count (:body response)) 3000))
       (is (valid-encrypted-token? secret (:body response))))))
 
 (deftest nil-response-test
