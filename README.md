@@ -47,22 +47,24 @@ You must use `wrap-anti-forgery` middleware inside of the standard
 
 ### Encrypted token
 
-You can use the encrypted token mode withoud the `wrap-session` middleware.
+You can use the encrypted token mode without the `wrap-session` middleware.
 
-You need to set some options on the `wrap-anti-forgery` middleware:
+You need to set some options on the `wrap-anti-forgery` middleware though:
 
 ```clojure
-(use 'ring.middleware.anti-forgery
-     'buddy.core.keys
-     'clj-time.core)
+(require '[ring.middleware.anti-forgery :refer :all]
+         '[buddy.core.keys :as keys]
+         '[ring.middleware.oauth2.strategy.signed-token :as signed-token])
+
+(def ^:private expires-in-one-hour (time/hours 1))
+(def ^:private pubkey (keys/public-key "dev-resources/test-certs/pubkey.pem"))
+(def ^:private privkey (keys/private-key "dev-resources/test-certs/privkey.pem" "antiforgery"))
+(def ^:private other-private-key (keys/private-key "dev-resources/test-certs/privkey-other.pem" "other"))
+(def ^:private signed-token-sms (signed-token/->SignedTokenSMS pubkey privkey expires-in-one-hour :identity))
 
 (def app
   (-> handler
-      wrap-anti-forgery {:encrypted-token? true?
-                         :public-key       (public-key "certs/pubkey.pem")
-                         :private-key      (private-key "certs/privkey.pem" "key-password")
-                         :secret           "secret-to-validate-token-after-decryption-to-make-sure-i-encrypted-stuff"
-                         :expiration       (hours 1)}))
+      wrap-anti-forgery {:state-management-strategy signed-token-sms})
 ```
 
 Public and private keys were created using commands from https://funcool.github.io/buddy-sign/latest/#generate-keypairs
