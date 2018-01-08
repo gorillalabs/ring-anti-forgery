@@ -20,4 +20,14 @@
   {:dev {:dependencies [[ring/ring-mock "0.3.0"]]}
    :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
    :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
-   :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}})
+   :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}}
+  :vcs :git
+  :scm {:name "git"
+        :url  "https://github.com/gorillalabs/ring-anti-forgery"}
+
+  :deploy-repositories [["releases" :clojars]]
+  :release-tasks [["vcs" "assert-committed"]
+                  ["v" "update"]                            ;; compute new version & tag it
+                  ["deploy"]
+                  ["vcs" "push"]]
+  )
