@@ -21,11 +21,17 @@
             (assoc :session (:session response (:session request)))
             (assoc-in [:session :ring.middleware.anti-forgery/anti-forgery-token] token))))))
 
+(defn- create-token [request]
+  (random/base64 60))
+
+
+
 (deftype SessionSMS []
   strategy/StateManagementStrategy
 
-  (create-token [this request]
-    (random/base64 60))
+  (token [this request]
+    (or (session-token request)
+        (create-token request)))
 
   (valid-token? [_ request read-token]
     (let [user-token (read-token request)
@@ -34,11 +40,5 @@
            stored-token
            (crypto/eq? user-token stored-token))))
 
-  (find-or-create-token [this request]
-    (or (session-token request)
-        (strategy/create-token this request)))
-
-  (delay-token-creation [this] false)
-
-  (wrap-response [this response request token]
+  (write-token [this response request token]
     (add-session-token this response request token)))
