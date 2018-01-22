@@ -23,30 +23,26 @@
   (let [response {:status 200, :headers {}, :body "Foo"}
         handler (wrap-anti-forgery (constantly response))]
     (are [status req] (= (:status (handler req)) status)
-                      403 (-> (request :post "/")
-                              (assoc :form-params {"__anti-forgery-token" "foo"}))
-                      403 (-> (request :post "/")
-                              (assoc :session {::af/anti-forgery-token "foo"})
-                              (assoc :form-params {"__anti-forgery-token" "bar"}))
-                      200 (-> (request :post "/")
-                              (assoc :session {::af/anti-forgery-token "foo"})
-                              (assoc :form-params {"__anti-forgery-token" "foo"})))))
-
-
+      403 (-> (request :post "/")
+              (assoc :form-params {"__anti-forgery-token" "foo"}))
+      403 (-> (request :post "/")
+              (assoc :session {::af/anti-forgery-token "foo"})
+              (assoc :form-params {"__anti-forgery-token" "bar"}))
+      200 (-> (request :post "/")
+              (assoc :session {::af/anti-forgery-token "foo"})
+              (assoc :form-params {"__anti-forgery-token" "foo"})))))
 
 (deftest request-method-test
   (let [response {:status 200, :headers {}, :body "Foo"}
         handler (wrap-anti-forgery (constantly response))]
     (are [status req] (= (:status (handler req)) status)
-                      200 (request :head "/")
-                      200 (request :get "/")
-                      200 (request :options "/")
-                      403 (request :post "/")
-                      403 (request :put "/")
-                      403 (request :patch "/")
-                      403 (request :delete "/"))))
-
-
+      200 (request :head "/")
+      200 (request :get "/")
+      200 (request :options "/")
+      403 (request :post "/")
+      403 (request :put "/")
+      403 (request :patch "/")
+      403 (request :delete "/"))))
 
 (deftest csrf-header-test
   (let [response {:status 200, :headers {}, :body "Foo"}
@@ -54,8 +50,8 @@
         sess-req (-> (request :post "/")
                      (assoc :session {::af/anti-forgery-token "foo"}))]
     (are [status req] (= (:status (handler req)) status)
-                      200 (assoc sess-req :headers {"x-csrf-token" "foo"})
-                      200 (assoc sess-req :headers {"x-xsrf-token" "foo"}))))
+      200 (assoc sess-req :headers {"x-csrf-token" "foo"})
+      200 (assoc sess-req :headers {"x-xsrf-token" "foo"}))))
 
 (deftest multipart-form-test
   (let [response {:status 200, :headers {}, :body "Foo"}
@@ -104,8 +100,8 @@
   (let [expected {:status 200, :headers {}, :body "Foo"}
         handler (wrap-anti-forgery (constantly expected))
         actual (handler
-                 (-> (request :get "/")
-                     (assoc-in [:session ::af/anti-forgery-token] "foo")))]
+                (-> (request :get "/")
+                    (assoc-in [:session ::af/anti-forgery-token] "foo")))]
     (is (= actual expected))))
 
 (deftest not-overwrite-session-test
@@ -122,7 +118,6 @@
         session (:session (handler (request :get "/")))]
     (is (contains? session ::af/anti-forgery-token))
     (is (= (session "foo") "bar"))))
-
 
 (deftest custom-error-response-test
   (let [response {:status 200, :headers {}, :body "Foo"}
@@ -146,16 +141,16 @@
 
 (deftest disallow-both-error-response-and-error-handler
   (is (thrown?
-        AssertionError
-        (wrap-anti-forgery (constantly {:status 200})
-                           {:error-handler  (fn [request] {:status 500 :body "Handler"})
-                            :error-response {:status 500 :body "Response"}}))))
+       AssertionError
+       (wrap-anti-forgery (constantly {:status 200})
+                          {:error-handler  (fn [request] {:status 500 :body "Handler"})
+                           :error-response {:status 500 :body "Response"}}))))
 
 (deftest custom-read-token-test
   (let [response {:status 200, :headers {}, :body "Foo"}
         handler (wrap-anti-forgery
-                  (constantly response)
-                  {:read-token #(get-in % [:headers "x-forgery-token"])})
+                 (constantly response)
+                 {:read-token #(get-in % [:headers "x-forgery-token"])})
         req (-> (request :post "/")
                 (assoc :session {::af/anti-forgery-token "foo"})
                 (assoc :headers {"x-forgery-token" "foo"}))]
