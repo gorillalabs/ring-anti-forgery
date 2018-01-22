@@ -45,39 +45,10 @@ You must use `wrap-anti-forgery` middleware inside of the standard
       wrap-session))
 ```
 
-### Encrypted token
+### Encrypted token to be used without session
 
-You can use the encrypted token mode without the `wrap-session` middleware.
-
-You need to set some options on the `wrap-anti-forgery` middleware though:
-
-```clojure
-(require '[ring.middleware.anti-forgery :refer :all]
-         '[buddy.core.keys :as keys]
-         '[ring.middleware.oauth2.strategy.signed-token :as signed-token])
-
-(def ^:private expires-in-one-hour (time/hours 1))
-(def ^:private pubkey (keys/public-key "dev-resources/test-certs/pubkey.pem"))
-(def ^:private privkey (keys/private-key "dev-resources/test-certs/privkey.pem" "antiforgery"))
-(def ^:private other-private-key (keys/private-key "dev-resources/test-certs/privkey-other.pem" "other"))
-(def ^:private signed-token-sms (signed-token/->SignedTokenSMS pubkey privkey expires-in-one-hour :identity))
-
-(def app
-  (-> handler
-      wrap-anti-forgery {:state-management-strategy signed-token-sms})
-```
-
-Public and private keys were created using commands from https://funcool.github.io/buddy-sign/latest/#generate-keypairs
-
-Generate aes256 encrypted private key:
-       
-    openssl genrsa -aes256 -out privkey.pem 2048
-       
-Generate public key from previously created private key:
-       
-    openssl rsa -pubout -in privkey.pem -out pubkey.pem
-       
-Maybe you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files.
+You can use other strategies to manage state (create, validitate and store the tokens), e.g. the encrypted token mode
+without the `wrap-session` middleware. To do so, refer to [ring-anti-forgery-strategies](https://github.com/gorillalabs/ring-anti-forgery-strategies).
 
 ## Token usage
 

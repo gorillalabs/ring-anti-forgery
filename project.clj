@@ -22,4 +22,4 @@
   {:dev {:dependencies [[ring/ring-mock "0.3.0"]]}
    :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
    :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
-   :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha11"]]}})
+   :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}})

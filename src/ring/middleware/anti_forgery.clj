@@ -1,24 +1,12 @@
 (ns ring.middleware.anti-forgery
   "Ring middleware to prevent CSRF attacks with an anti-forgery token."
-  (:require [clj-time.core :as time]
-            [clj-time.coerce]
-            [ring.middleware.anti-forgery.strategy :as strategy]
+  (:require [ring.middleware.anti-forgery.strategy :as strategy]
             [ring.middleware.anti-forgery.strategy.session :as session]))
 
 (def ^{:doc     "Binding that stores an anti-forgery token that must be included
             in POST forms if the handler is wrapped in wrap-anti-forgery."
        :dynamic true}
-*anti-forgery-token*)
-
-
-
-
-
-
-
-
-
-
+  *anti-forgery-token*)
 
 (defn- form-params [request]
   (merge (:form-params request)
@@ -28,10 +16,6 @@
   (or (-> request form-params (get "__anti-forgery-token"))
       (-> request :headers (get "x-csrf-token"))
       (-> request :headers (get "x-xsrf-token"))))
-
-
-
-
 
 (defn- get-request? [{method :request-method}]
   (or (= method :head)
@@ -55,13 +39,6 @@
 (defn- make-error-handler [options]
   (or (:error-handler options)
       (constant-handler (:error-response options default-error-response))))
-
-(defn new-token
-  "Creates a new CSRF token to use.
-  Attention, does not work for session based token handling,
-  as it will not be put into session."
-  [state-management-strategy request]
-  (strategy/create-token state-management-strategy request))
 
 (defn wrap-anti-forgery
   "Middleware that prevents CSRF attacks. Any POST request to the handler
@@ -90,8 +67,8 @@
 
   :delay-token-creation  - If false, will bind token to *anti-forgery-token*.
                if :delay-token-creation is true, *anti-forgery-token* will be dereferable to a valid token.
-               Defaults to the delay-token-creation value of state-management-strategy
-
+               Default is based on state-management-strategy: defaults to true, iff strategy satisfies
+               `ring.middleware.anti-forgery.strategy/DelayTokenCreation`)
 
   Only one of :error-response, :error-handler may be specified."
 
@@ -100,21 +77,21 @@
   ([handler options]
    {:pre [(not (and (:error-response options) (:error-handler options)))]}
    (let [state-management-strategy (get options :state-management-strategy (session/->SessionSMS))
-         delay-token-creation (get options :delay-token-creation (strategy/delay-token-creation state-management-strategy))
+         delay-token-creation (get options :delay-token-creation (satisfies? strategy/DelayTokenCreation state-management-strategy))
          read-token (:read-token options default-request-token)
          error-handler-fn (make-error-handler options)]
      (fn
        ([request]
         (if (valid-request? state-management-strategy request read-token)
-          (let [delayed-token (delay (strategy/find-or-create-token state-management-strategy request))
+          (let [delayed-token (delay (strategy/token state-management-strategy request))
                 token (if delay-token-creation delayed-token @delayed-token)]
             (binding [*anti-forgery-token* token]
-              (strategy/wrap-response state-management-strategy (handler request) request token)))
+              (strategy/write-token state-management-strategy (handler request) request token)))
           (error-handler-fn request)))
        ([request respond raise]
         (if (valid-request? state-management-strategy request read-token)
-          (let [delayed-token (delay (strategy/find-or-create-token state-management-strategy request))
+          (let [delayed-token (delay (strategy/token state-management-strategy request))
                 token (if delay-token-creation delayed-token @delayed-token)]
             (binding [*anti-forgery-token* token]
-              (handler request #(respond (strategy/wrap-response state-management-strategy % request token)) raise)))
+              (handler request #(respond (strategy/write-token state-management-strategy % request token)) raise)))
           (error-handler-fn request respond raise)))))))
