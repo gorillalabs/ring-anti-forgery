@@ -7,8 +7,7 @@
   (let [potentially-delayed-token *anti-forgery-token*
         token (if (delay? potentially-delayed-token)
                 @potentially-delayed-token
-                potentially-delayed-token
-                )]
+                potentially-delayed-token)]
     token))
 
 (defn anti-forgery-field

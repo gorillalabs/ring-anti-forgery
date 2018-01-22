@@ -6,8 +6,7 @@
 (def ^{:doc     "Binding that stores an anti-forgery token that must be included
             in POST forms if the handler is wrapped in wrap-anti-forgery."
        :dynamic true}
-*anti-forgery-token*)
-
+  *anti-forgery-token*)
 
 (defn- form-params [request]
   (merge (:form-params request)
@@ -17,10 +16,6 @@
   (or (-> request form-params (get "__anti-forgery-token"))
       (-> request :headers (get "x-csrf-token"))
       (-> request :headers (get "x-xsrf-token"))))
-
-
-
-
 
 (defn- get-request? [{method :request-method}]
   (or (= method :head)

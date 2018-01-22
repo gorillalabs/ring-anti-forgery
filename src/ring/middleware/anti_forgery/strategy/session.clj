@@ -6,11 +6,8 @@
 ;; Implements a synchronizer token pattern, see https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Synchronizer_.28CSRF.29_Tokens
 
 
-
-
 (defn- session-token [request]
   (get-in request [:session :ring.middleware.anti-forgery/anti-forgery-token]))
-
 
 (defn- add-session-token [session-sms response request token]
   (if response
@@ -23,8 +20,6 @@
 
 (defn- create-token [request]
   (random/base64 60))
-
-
 
 (deftype SessionSMS []
   strategy/StateManagementStrategy
