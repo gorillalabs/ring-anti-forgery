@@ -23,16 +23,14 @@ https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Che
 (deftype SessionSMS []
   strategy/StateManagementStrategy
 
-  (token [this request]
+  (get-token [this request]
     (or (session-token request)
         (create-token request)))
 
-  (valid-token? [_ request read-token]
-    (let [user-token (read-token request)
-          stored-token (session-token request)]
-      (and user-token
-           stored-token
-           (crypto/eq? user-token stored-token))))
+  (valid-token? [_ request token]
+    (let [stored-token (session-token request)]
+      (and stored-token
+           (crypto/eq? token stored-token))))
 
-  (write-token [this response request potentially-delayed-token]
-    (add-session-token this response request (force potentially-delayed-token))))
+  (write-token [this request response token]
+    (add-session-token this response request (force token))))

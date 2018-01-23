@@ -11,14 +11,14 @@
   StateManagmentStrategy is the protocol to abstract the process
   of token creation and validation."
 
-  (token [strategy request]
+  (get-token [strategy request]
     "Returns a token to be used. Users of ring.middleware.anti-forgery should use the appropriate utility functions
     from `ring.util.anti-forgery` namespace.")
 
-  (valid-token? [strategy request read-token]
-    "Given the `request` and the `read-token` function to retrieve the token from the request, `valid-token?` returns
-    true if the token used in that request is valid. Returns false otherwise.")
+  (valid-token? [strategy request token]
+    "Given the `request` and the `token` from that request, `valid-token?` returns
+    true if the token is valid. Returns false otherwise.")
 
-  (write-token [strategy response request token]
+  (write-token [strategy request response token]
     "Some state management strategies do need to remember state (e.g., by storing it to some storage accessible
     in different requests). `write-token` is the method to handle state persistence, if necessary."))

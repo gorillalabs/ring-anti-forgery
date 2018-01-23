@@ -6,7 +6,7 @@
 (def ^{:doc     "Binding that stores an anti-forgery token that must be included
             in POST forms if the handler is wrapped in wrap-anti-forgery."
        :dynamic true}
-  *anti-forgery-token*)
+*anti-forgery-token*)
 
 (defn- form-params [request]
   (merge (:form-params request)
@@ -24,7 +24,8 @@
 
 (defn- valid-request? [state-management-strategy request read-token]
   (or (get-request? request)
-      (strategy/valid-token? state-management-strategy request read-token)))
+      (when-let [token (read-token request)]
+        (strategy/valid-token? state-management-strategy request token))))
 
 (def ^:private default-error-response
   {:status  403
@@ -77,13 +78,13 @@
      (fn
        ([request]
         (if (valid-request? state-management-strategy request read-token)
-          (let [potentially-delayed-token (strategy/token state-management-strategy request)]
-            (binding [*anti-forgery-token* potentially-delayed-token]
-              (strategy/write-token state-management-strategy (handler request) request potentially-delayed-token)))
+          (let [token (strategy/get-token state-management-strategy request)]
+            (binding [*anti-forgery-token* token]
+              (strategy/write-token state-management-strategy request (handler request) token)))
           (error-handler-fn request)))
        ([request respond raise]
         (if (valid-request? state-management-strategy request read-token)
-          (let [potentially-delayed-token (delay (strategy/token state-management-strategy request))]
-            (binding [*anti-forgery-token* potentially-delayed-token]
-              (handler request #(respond (strategy/write-token state-management-strategy % request potentially-delayed-token)) raise)))
+          (let [token (strategy/get-token state-management-strategy request)]
+            (binding [*anti-forgery-token* token]
+              (handler request #(respond (strategy/write-token state-management-strategy request % token)) raise)))
           (error-handler-fn request respond raise)))))))
