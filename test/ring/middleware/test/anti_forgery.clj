@@ -1,10 +1,9 @@
 (ns ring.middleware.test.anti-forgery
-  (:require [ring.middleware.anti-forgery :as af]
+  (:require  [clojure.test :refer :all]
+             [ring.middleware.anti-forgery :as af :refer :all]
             [ring.middleware.anti-forgery.strategy :as strategy]
-            [ring.middleware.anti-forgery.strategy.session :as session])
-  (:use clojure.test
-        ring.middleware.anti-forgery
-        ring.mock.request))
+            [ring.middleware.anti-forgery.strategy.session :as session]
+             [ring.mock.request :refer [request]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

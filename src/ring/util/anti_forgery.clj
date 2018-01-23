@@ -1,13 +1,12 @@
 (ns ring.util.anti-forgery
   "Utility functions for inserting anti-forgery tokens into HTML forms."
-  (:use [hiccup core form]
-        ring.middleware.anti-forgery))
+  (:require [hiccup.core :as h]
+            [hiccup.form :as hf]
+            [ring.middleware.anti-forgery :as anti-forgery]))
 
 (defn anti-forgery-token []
-  (let [potentially-delayed-token *anti-forgery-token*
-        token (if (delay? potentially-delayed-token)
-                @potentially-delayed-token
-                potentially-delayed-token)]
+  (let [potentially-delayed-token anti-forgery/*anti-forgery-token*
+        token (force potentially-delayed-token)]
     token))
 
 (defn anti-forgery-field
@@ -15,4 +14,4 @@
   This ensures that the form it's inside won't be stopped by the anti-forgery
   middleware."
   []
-  (html (hidden-field "__anti-forgery-token" (anti-forgery-token))))
+  (h/html (hf/hidden-field "__anti-forgery-token" (anti-forgery-token))))
