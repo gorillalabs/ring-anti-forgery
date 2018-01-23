@@ -3,10 +3,10 @@
   (:require [ring.middleware.anti-forgery.strategy :as strategy]
             [ring.middleware.anti-forgery.strategy.session :as session]))
 
-(def ^{:doc     "Binding that stores an anti-forgery token that must be included
+(def ^{:doc "Binding that stores an anti-forgery token that must be included
             in POST forms if the handler is wrapped in wrap-anti-forgery."
        :dynamic true}
-*anti-forgery-token*)
+  *anti-forgery-token*)
 
 (defn- form-params [request]
   (merge (:form-params request)
@@ -54,20 +54,19 @@
 
   Accepts the following options:
 
-  :read-token       - a function that takes a request and returns an anti-forgery
-                      token, or nil if the token does not exist
+  :read-token     - a function that takes a request and returns an anti-forgery
+                    token, or nil if the token does not exist
 
-  :error-response   - the response to return if the anti-forgery token is
-                      incorrect or missing
+  :error-response - the response to return if the anti-forgery token is
+                    incorrect or missing
 
-  :error-handler    - a handler function to call if the anti-forgery token is
-                      incorrect or missing.
+  :error-handler  - a handler function to call if the anti-forgery token is
+                    incorrect or missing.
 
   :state-management-strategy - A state management strategy,
                                ring.middleware.anti-forgery.strategy.session/session-sms by default.
 
   Only one of :error-response, :error-handler may be specified."
-
   ([handler]
    (wrap-anti-forgery handler {}))
   ([handler options]
