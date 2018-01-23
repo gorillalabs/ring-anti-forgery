@@ -22,9 +22,3 @@
   (write-token [strategy response request token]
     "Some state management strategies do need to remember state (e.g., by storing it to some storage accessible
     in different requests). `write-token` is the method to handle state persistence, if necessary."))
-
-(defprotocol DelayTokenCreation
-  "Some state creation strategies are too compute intense to create new tokens in advance without knowing whether
-  they will be used at all. Instead, new tokens should only be created upon consumption. As this is more a property
-  of the creation process, and not so much on the personal gusto of the user of `ring.middleware.anti-forgery`,
-  this is driven by this indicator protocol. Just add `DelayTokenCreation` to delay token creation by default.")

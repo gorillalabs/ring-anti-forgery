@@ -1,10 +1,9 @@
 (ns ring.middleware.anti-forgery.strategy.session
+  "Implements a synchronizer token pattern, see
+https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Synchronizer_.28CSRF.29_Tokens"
   (:require [ring.middleware.anti-forgery.strategy :as strategy]
             [crypto.equality :as crypto]
             [crypto.random :as random]))
-
-;; Implements a synchronizer token pattern, see https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Synchronizer_.28CSRF.29_Tokens
-
 
 (defn- session-token [request]
   (get-in request [:session :ring.middleware.anti-forgery/anti-forgery-token]))
@@ -35,5 +34,5 @@
            stored-token
            (crypto/eq? user-token stored-token))))
 
-  (write-token [this response request token]
-    (add-session-token this response request token)))
+  (write-token [this response request potentially-delayed-token]
+    (add-session-token this response request (force potentially-delayed-token))))

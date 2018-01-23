@@ -65,11 +65,6 @@
   :state-management-strategy - A state management strategy,
                                ring.middleware.anti-forgery.strategy.session/session-sms by default.
 
-  :delay-token-creation  - If false, will bind token to *anti-forgery-token*.
-               if :delay-token-creation is true, *anti-forgery-token* will be dereferable to a valid token.
-               Default is based on state-management-strategy: defaults to true, iff strategy satisfies
-               `ring.middleware.anti-forgery.strategy/DelayTokenCreation`)
-
   Only one of :error-response, :error-handler may be specified."
 
   ([handler]
@@ -77,21 +72,18 @@
   ([handler options]
    {:pre [(not (and (:error-response options) (:error-handler options)))]}
    (let [state-management-strategy (get options :state-management-strategy (session/->SessionSMS))
-         delay-token-creation (get options :delay-token-creation (satisfies? strategy/DelayTokenCreation state-management-strategy))
          read-token (:read-token options default-request-token)
          error-handler-fn (make-error-handler options)]
      (fn
        ([request]
         (if (valid-request? state-management-strategy request read-token)
-          (let [delayed-token (delay (strategy/token state-management-strategy request))
-                token (if delay-token-creation delayed-token @delayed-token)]
-            (binding [*anti-forgery-token* token]
-              (strategy/write-token state-management-strategy (handler request) request token)))
+          (let [potentially-delayed-token (strategy/token state-management-strategy request)]
+            (binding [*anti-forgery-token* potentially-delayed-token]
+              (strategy/write-token state-management-strategy (handler request) request potentially-delayed-token)))
           (error-handler-fn request)))
        ([request respond raise]
         (if (valid-request? state-management-strategy request read-token)
-          (let [delayed-token (delay (strategy/token state-management-strategy request))
-                token (if delay-token-creation delayed-token @delayed-token)]
-            (binding [*anti-forgery-token* token]
-              (handler request #(respond (strategy/write-token state-management-strategy % request token)) raise)))
+          (let [potentially-delayed-token (delay (strategy/token state-management-strategy request))]
+            (binding [*anti-forgery-token* potentially-delayed-token]
+              (handler request #(respond (strategy/write-token state-management-strategy % request potentially-delayed-token)) raise)))
           (error-handler-fn request respond raise)))))))
