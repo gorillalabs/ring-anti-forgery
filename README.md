@@ -3,12 +3,15 @@
 [![Build Status](https://travis-ci.org/ring-clojure/ring-anti-forgery.svg?branch=master)](https://travis-ci.org/ring-clojure/ring-anti-forgery)
 
 Ring middleware that prevents [CSRF][1] attacks by via a
-randomly-generated anti-forgery [synchronizer token](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Synchronizer_.28CSRF.29_Tokens)
-or by implementing an [encrypted token](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Encrypted_Token_Pattern).
+randomly-generated anti-forgery [synchronizer token][2]
+or by implementing an [encrypted token][3].
 
-Make sure to always use tls (https), here especially use it to prevent replay attacks!
+Make sure to always use tls (https), here especially use it to prevent
+replay attacks!
 
 [1]: http://en.wikipedia.org/wiki/Cross-site_request_forgery
+[2]: https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Synchronizer_.28CSRF.29_Tokens
+[3]: https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Encrypted_Token_Pattern
 
 ## Install
 
@@ -47,8 +50,12 @@ You must use `wrap-anti-forgery` middleware inside of the standard
 
 ### Encrypted token to be used without session
 
-You can use other strategies to manage state (create, validitate and store the tokens), e.g. the encrypted token mode
-without the `wrap-session` middleware. To do so, refer to [ring-anti-forgery-strategies](https://github.com/gorillalabs/ring-anti-forgery-strategies).
+You can use other strategies to manage state (create, validate and
+store the tokens), e.g. the encrypted token mode without the
+`wrap-session` middleware. To do so, refer to
+[ring-anti-forgery-strategies][4]
+
+[4]: https://github.com/gorillalabs/ring-anti-forgery-strategies.
 
 ## Token usage
 
