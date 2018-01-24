@@ -1,22 +1,9 @@
 (ns ring.middleware.test.anti-forgery
-  (:require  [clojure.test :refer :all]
-             [ring.middleware.anti-forgery :as af :refer :all]
-            [ring.middleware.anti-forgery.strategy :as strategy]
-            [ring.middleware.anti-forgery.strategy.session :as session]
-             [ring.mock.request :refer [request]]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Generic helpers
-;;
-
-(defn- status=* [handler status req]
-  (= status (:status (handler req))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Tests follow below
-;;
+  (:require  [ring.middleware.anti-forgery :as af :refer :all]
+             [ring.middleware.anti-forgery.strategy :as strategy]
+             [ring.middleware.anti-forgery.session :as session]
+             [ring.mock.request :refer [request]])
+  (:use clojure.test))
 
 (deftest forgery-protection-test
   (let [response {:status 200, :headers {}, :body "Foo"}
@@ -142,7 +129,7 @@
   (is (thrown?
         AssertionError
         (wrap-anti-forgery (constantly {:status 200})
-                           {:error-handler  (fn [request] {:status 500 :body "Handler"})
+                           {:error-handler (fn [request] {:status 500 :body "Handler"})
                             :error-response {:status 500 :body "Response"}}))))
 
 (deftest custom-read-token-test

@@ -1,12 +1,12 @@
 (ns ring.middleware.anti-forgery
   "Ring middleware to prevent CSRF attacks with an anti-forgery token."
   (:require [ring.middleware.anti-forgery.strategy :as strategy]
-            [ring.middleware.anti-forgery.strategy.session :as session]))
+            [ring.middleware.anti-forgery.session :as session]))
 
-(def ^{:doc "Binding that stores an anti-forgery token that must be included
+(def ^{:doc     "Binding that stores an anti-forgery token that must be included
             in POST forms if the handler is wrapped in wrap-anti-forgery."
        :dynamic true}
-  *anti-forgery-token*)
+*anti-forgery-token*)
 
 (defn- form-params [request]
   (merge (:form-params request)
@@ -22,10 +22,10 @@
       (= method :get)
       (= method :options)))
 
-(defn- valid-request? [state-management-strategy request read-token]
+(defn- valid-request? [strategy request read-token]
   (or (get-request? request)
       (when-let [token (read-token request)]
-        (strategy/valid-token? state-management-strategy request token))))
+        (strategy/valid-token? strategy request token))))
 
 (def ^:private default-error-response
   {:status  403
@@ -63,27 +63,33 @@
   :error-handler  - a handler function to call if the anti-forgery token is
                     incorrect or missing.
 
-  :state-management-strategy - A state management strategy,
-                               ring.middleware.anti-forgery.strategy.session/session-sms by default.
+  :strategy       - a state management strategy,
+                    ring.middleware.anti-forgery.session/session-strategy by
+                    default.
 
   Only one of :error-response, :error-handler may be specified."
   ([handler]
    (wrap-anti-forgery handler {}))
   ([handler options]
    {:pre [(not (and (:error-response options) (:error-handler options)))]}
-   (let [state-management-strategy (get options :state-management-strategy (session/->SessionSMS))
+   (let [strategy (:strategy options (session/session-strategy))
          read-token (:read-token options default-request-token)
          error-handler-fn (make-error-handler options)]
      (fn
        ([request]
-        (if (valid-request? state-management-strategy request read-token)
-          (let [token (strategy/get-token state-management-strategy request)]
+        (if (valid-request? strategy request read-token)
+          (let [token (strategy/get-token strategy request)]
             (binding [*anti-forgery-token* token]
-              (strategy/write-token state-management-strategy request (handler request) token)))
+              (when-let [response (handler request)]
+                (strategy/write-token strategy request response token))))
           (error-handler-fn request)))
        ([request respond raise]
-        (if (valid-request? state-management-strategy request read-token)
-          (let [token (strategy/get-token state-management-strategy request)]
+        (if (valid-request? strategy request read-token)
+          (let [token (strategy/get-token strategy request)]
             (binding [*anti-forgery-token* token]
-              (handler request #(respond (strategy/write-token state-management-strategy request % token)) raise)))
+              (handler request
+                       #(respond
+                          (when %
+                            (strategy/write-token strategy request % token)))
+                       raise)))
           (error-handler-fn request respond raise)))))))
