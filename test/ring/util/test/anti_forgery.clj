@@ -1,7 +1,7 @@
 (ns ring.util.test.anti-forgery
-  (:use clojure.test
-        ring.util.anti-forgery
-        ring.middleware.anti-forgery))
+  (:require [clojure.test :refer :all]
+            [ring.util.anti-forgery :refer :all]
+            [ring.middleware.anti-forgery :refer :all]))
 
 (deftest anti-forgery-field-test
   (binding [*anti-forgery-token* "abc"]
