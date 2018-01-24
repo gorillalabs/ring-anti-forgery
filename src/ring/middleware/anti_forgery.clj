@@ -3,10 +3,10 @@
   (:require [ring.middleware.anti-forgery.strategy :as strategy]
             [ring.middleware.anti-forgery.session :as session]))
 
-(def ^{:doc     "Binding that stores an anti-forgery token that must be included
+(def ^{:doc "Binding that stores an anti-forgery token that must be included
             in POST forms if the handler is wrapped in wrap-anti-forgery."
        :dynamic true}
-*anti-forgery-token*)
+  *anti-forgery-token*)
 
 (defn- form-params [request]
   (merge (:form-params request)
@@ -72,9 +72,9 @@
    (wrap-anti-forgery handler {}))
   ([handler options]
    {:pre [(not (and (:error-response options) (:error-handler options)))]}
-   (let [strategy (:strategy options (session/session-strategy))
-         read-token (:read-token options default-request-token)
-         error-handler-fn (make-error-handler options)]
+   (let [read-token    (:read-token options default-request-token)
+         strategy      (:strategy options (session/session-strategy))
+         error-handler (make-error-handler options)]
      (fn
        ([request]
         (if (valid-request? strategy request read-token)
@@ -82,14 +82,14 @@
             (binding [*anti-forgery-token* token]
               (when-let [response (handler request)]
                 (strategy/write-token strategy request response token))))
-          (error-handler-fn request)))
+          (error-handler request)))
        ([request respond raise]
         (if (valid-request? strategy request read-token)
           (let [token (strategy/get-token strategy request)]
             (binding [*anti-forgery-token* token]
               (handler request
                        #(respond
-                          (when %
-                            (strategy/write-token strategy request % token)))
+                         (when %
+                           (strategy/write-token strategy request % token)))
                        raise)))
-          (error-handler-fn request respond raise)))))))
+          (error-handler request respond raise)))))))

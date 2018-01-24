@@ -1,9 +1,10 @@
 (ns ring.middleware.test.anti-forgery
-  (:require  [ring.middleware.anti-forgery :as af :refer :all]
-             [ring.middleware.anti-forgery.strategy :as strategy]
-             [ring.middleware.anti-forgery.session :as session]
-             [ring.mock.request :refer [request]])
-  (:use clojure.test))
+  (:require [ring.middleware.anti-forgery :as af]
+            [ring.middleware.anti-forgery.strategy :as strategy]
+            [ring.middleware.anti-forgery.session :as session])
+  (:use clojure.test
+        ring.middleware.anti-forgery
+        ring.mock.request))
 
 (deftest forgery-protection-test
   (let [response {:status 200, :headers {}, :body "Foo"}

@@ -1,6 +1,5 @@
 (ns ring.middleware.anti-forgery.session
-  "Implements a synchronizer token pattern, see
-   https://goo.gl/WRm7Kp"
+  "Implements a synchronizer token pattern, see https://goo.gl/WRm7Kp"
   (:require [ring.middleware.anti-forgery.strategy :as strategy]
             [crypto.equality :as crypto]
             [crypto.random :as random]))
@@ -10,7 +9,6 @@
 
 (deftype SessionStrategy []
   strategy/Strategy
-
   (get-token [this request]
     (or (session-token request)
         (random/base64 60)))
