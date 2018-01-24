@@ -5,9 +5,7 @@
             [ring.middleware.anti-forgery :as anti-forgery]))
 
 (defn anti-forgery-token []
-  (let [potentially-delayed-token anti-forgery/*anti-forgery-token*
-        token (force potentially-delayed-token)]
-    token))
+  (force anti-forgery/*anti-forgery-token*))
 
 (defn anti-forgery-field
   "Create a hidden field with the session anti-forgery token as its value.
